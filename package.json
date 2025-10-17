@@ -1,0 +1,21 @@
+{
+  "name": "ai-home-redesign",
+  "version": "1.0.0",
+  "description": "AI-powered home redesign and visualization platform",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "npm run start --workspace=frontend",
+    "start:backend": "npm run start --workspace=backend",
+    "install:all": "npm install && npm install --workspace=frontend && npm install --workspace=backend",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
+    "dev": "concurrently \"npm run dev --workspace=frontend\" \"npm run dev --workspace=backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
