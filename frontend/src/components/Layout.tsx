@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
+import { ShoppingCart, Plus } from 'lucide-react'
+import { useMaterialContext } from '../context/MaterialContext'
 
 const LayoutContainer = styled.div`
   min-height: 100vh;
@@ -40,6 +42,53 @@ const Logo = styled(Link)`
 const NavLinks = styled.div`
   display: flex;
   gap: 2.5rem;
+  align-items: center;
+`
+
+const MaterialCart = styled.div`
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(0, 212, 255, 0.1);
+  }
+`
+
+const CartBadge = styled.div`
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+`
+
+const StartProjectButton = styled(Link)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
 `
 
 const NavLink = styled(Link)<{ $active?: boolean }>`
@@ -87,6 +136,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation()
+  const { state, toggleCart } = useMaterialContext()
+  const selectedCount = state.selectedMaterials.length
 
   return (
     <LayoutContainer>
@@ -97,15 +148,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <NavLink to="/" $active={location.pathname === '/'}>
               Home
             </NavLink>
-            <NavLink to="/upload" $active={location.pathname === '/upload'}>
-              Upload
-            </NavLink>
             <NavLink to="/materials" $active={location.pathname === '/materials'}>
               Materials
+            </NavLink>
+            <NavLink to="/upload" $active={location.pathname === '/upload'}>
+              Upload
             </NavLink>
             <NavLink to="/gallery" $active={location.pathname === '/gallery'}>
               Gallery
             </NavLink>
+            <MaterialCart onClick={toggleCart}>
+              <ShoppingCart size={20} />
+              {selectedCount > 0 && (
+                <CartBadge>
+                  {selectedCount}
+                </CartBadge>
+              )}
+            </MaterialCart>
+            <StartProjectButton to="/upload">
+              <Plus size={16} />
+              Start Project
+            </StartProjectButton>
           </NavLinks>
         </Nav>
       </Header>

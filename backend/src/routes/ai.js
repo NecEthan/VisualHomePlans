@@ -5,10 +5,43 @@ const router = express.Router();
 // Generate AI image variations
 router.post('/generate', async (req, res) => {
   try {
-    const { imagePath, modifications, style } = req.body;
+    const { 
+      imagePath, 
+      modifications, 
+      style, 
+      materialIds, 
+      textPrompt, 
+      roomDimensions 
+    } = req.body;
 
     // TODO: Integrate with AI image generation service
     // This is a placeholder for the actual AI integration
+    
+    // Calculate cost if materials are provided
+    let costEstimate = null;
+    if (materialIds && materialIds.length > 0 && roomDimensions) {
+      // Mock cost calculation - in real implementation, this would query the Material model
+      const mockMaterialCosts = materialIds.map((materialId, index) => ({
+        materialId,
+        materialName: `Material ${index + 1}`,
+        quantity: Math.ceil(roomDimensions.area / 1), // Assuming 1 sq ft per unit
+        unitPrice: 5.00 + (index * 2.50),
+        totalCost: Math.ceil(roomDimensions.area / 1) * (5.00 + (index * 2.50)),
+        supplierUrl: `https://example.com/material/${materialId}`,
+        supplierName: `Supplier ${index + 1}`
+      }));
+      
+      const totalMaterialCost = mockMaterialCosts.reduce((sum, item) => sum + item.totalCost, 0);
+      const laborEstimate = totalMaterialCost * 0.4; // 40% of material cost
+      
+      costEstimate = {
+        materialCosts: mockMaterialCosts,
+        totalMaterialCost,
+        laborEstimate,
+        totalProjectCost: totalMaterialCost + laborEstimate,
+        calculatedAt: new Date()
+      };
+    }
     
     // Mock response for now
     const mockVariations = [
@@ -17,6 +50,7 @@ router.post('/generate', async (req, res) => {
         imageUrl: '/api/mock-images/variation1.jpg',
         modifications: modifications,
         style: style,
+        appliedMaterials: materialIds || [],
         createdAt: new Date().toISOString()
       },
       {
@@ -24,13 +58,16 @@ router.post('/generate', async (req, res) => {
         imageUrl: '/api/mock-images/variation2.jpg',
         modifications: modifications,
         style: style,
+        appliedMaterials: materialIds || [],
         createdAt: new Date().toISOString()
       }
     ];
 
     res.json({
       message: 'AI generation completed',
-      variations: mockVariations
+      variations: mockVariations,
+      costEstimate,
+      generationType: materialIds && materialIds.length > 0 ? 'materials' : 'description'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

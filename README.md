@@ -82,7 +82,7 @@ ai-home-redesign/
    
    **Backend** (copy `backend/env.example` to `backend/.env`):
    ```env
-   PORT=5001
+   PORT=5002
    NODE_ENV=development
    FRONTEND_URL=http://localhost:3000
    MONGODB_URI=mongodb://localhost:27017/ai-home-redesign
@@ -95,7 +95,7 @@ ai-home-redesign/
 
    **Frontend** (copy `frontend/env.example` to `frontend/.env`):
    ```env
-   VITE_API_URL=http://localhost:5001/api
+   VITE_API_URL=http://localhost:5002/api
    VITE_APP_NAME=AI Home Redesign
    VITE_APP_VERSION=1.0.0
    VITE_MAX_FILE_SIZE=10485760
@@ -112,7 +112,7 @@ ai-home-redesign/
    npm run dev
    ```
 
-   This will start both frontend (http://localhost:3000) and backend (http://localhost:5001) servers concurrently.
+   This will start both frontend (http://localhost:3001) and backend (http://localhost:5002) servers concurrently.
 
 ### Alternative: Start servers individually
 

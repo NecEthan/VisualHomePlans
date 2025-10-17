@@ -6,19 +6,22 @@ import Editor from './pages/Editor'
 import Gallery from './pages/Gallery'
 import Project from './pages/Project'
 import Materials from './pages/Materials'
+import { MaterialProvider } from './context/MaterialContext'
 
 function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/editor/:projectId" element={<Editor />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/project/:projectId" element={<Project />} />
-        <Route path="/materials" element={<Materials />} />
-      </Routes>
-    </Layout>
+    <MaterialProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/upload" element={<Upload />} />
+          <Route path="/editor/:projectId" element={<Editor />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/project/:projectId" element={<Project />} />
+          <Route path="/materials" element={<Materials />} />
+        </Routes>
+      </Layout>
+    </MaterialProvider>
   )
 }
 

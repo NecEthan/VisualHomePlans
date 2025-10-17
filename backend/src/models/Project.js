@@ -19,6 +19,28 @@ const projectSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  roomDimensions: {
+    length: Number,
+    width: Number,
+    height: Number,
+    area: Number,
+    unit: {
+      type: String,
+      enum: ['ft', 'meters'],
+      default: 'ft'
+    }
+  },
+  selectedMaterials: [{
+    materialId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Material'
+    },
+    quantity: Number,
+    appliedTo: {
+      type: String,
+      enum: ['flooring', 'walls', 'roofing', 'windows', 'doors', 'lighting', 'furniture']
+    }
+  }],
   modifications: {
     extensionSize: {
       width: Number,
@@ -43,6 +65,24 @@ const projectSchema = new mongoose.Schema({
         y: Number
       }
     }]
+  },
+  costEstimate: {
+    materialCosts: [{
+      materialId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Material'
+      },
+      materialName: String,
+      quantity: Number,
+      unitPrice: Number,
+      totalCost: Number,
+      supplierUrl: String,
+      supplierName: String
+    }],
+    totalMaterialCost: Number,
+    laborEstimate: Number,
+    totalProjectCost: Number,
+    lastCalculated: Date
   },
   generatedVariations: [{
     id: String,

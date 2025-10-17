@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import { 
@@ -9,8 +9,12 @@ import {
   Star,
   DollarSign,
   Package,
-  Truck
+  Truck,
+  X,
+  Check
 } from 'lucide-react'
+import { useMaterialContext } from '../context/MaterialContext'
+import MaterialPreview from '../components/MaterialPreview'
 
 const MaterialsContainer = styled.div`
   max-width: 1400px;
@@ -233,9 +237,99 @@ const SupplierButton = styled.button`
   }
 `
 
+const SelectedMaterialsSection = styled.div`
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+`
+
+const SelectedHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`
+
+const SelectedTitle = styled.h3`
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`
+
+const ClearButton = styled.button`
+  background: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: #ff6b6b;
+  }
+`
+
+const SelectedMaterialsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+`
+
+const QuickActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+`
+
+const QuickActionButton = styled.button`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+`
+
+const SecondaryButton = styled.button`
+  background: transparent;
+  color: #00d4ff;
+  border: 1px solid #00d4ff;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #00d4ff;
+    color: white;
+  }
+`
+
 const Materials: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const { state, addMaterial, removeMaterial, clearMaterials } = useMaterialContext()
 
   const categories = [
     'all', 'flooring', 'walls', 'roofing', 'windows', 'doors', 'lighting', 'furniture'
@@ -311,6 +405,23 @@ const Materials: React.FC = () => {
     return matchesCategory && matchesSearch
   })
 
+  const handleAddToProject = (material: any) => {
+    // Determine the application area based on material category
+    const appliedTo = material.category === 'flooring' ? 'flooring' :
+                     material.category === 'walls' ? 'walls' :
+                     material.category === 'roofing' ? 'roofing' :
+                     material.category === 'windows' ? 'windows' :
+                     material.category === 'doors' ? 'doors' :
+                     material.category === 'lighting' ? 'lighting' :
+                     'furniture'
+    
+    addMaterial(material, appliedTo)
+  }
+
+  const isMaterialSelected = (materialId: string) => {
+    return state.selectedMaterials.some(m => m._id === materialId)
+  }
+
   return (
     <MaterialsContainer>
       <MaterialsHeader>
@@ -319,6 +430,43 @@ const Materials: React.FC = () => {
           Browse real-world materials and connect with suppliers for your home redesign project
         </MaterialsSubtitle>
       </MaterialsHeader>
+
+      {/* Selected Materials Section */}
+      {state.selectedMaterials.length > 0 && (
+        <SelectedMaterialsSection>
+          <SelectedHeader>
+            <SelectedTitle>
+              <Check size={20} />
+              Selected Materials ({state.selectedMaterials.length})
+            </SelectedTitle>
+            <ClearButton onClick={clearMaterials}>
+              <X size={16} />
+              Clear All
+            </ClearButton>
+          </SelectedHeader>
+          <SelectedMaterialsList>
+            {state.selectedMaterials.map((material) => (
+              <MaterialPreview
+                key={`${material._id}-${material.appliedTo}`}
+                material={material}
+                onRemove={removeMaterial}
+                showCalculator={true}
+                showQuantity={true}
+                isSelected={true}
+              />
+            ))}
+          </SelectedMaterialsList>
+          <QuickActions>
+            <QuickActionButton onClick={() => window.location.href = '/upload'}>
+              <ShoppingCart size={16} />
+              Upload Image Now
+            </QuickActionButton>
+            <SecondaryButton onClick={() => setSearchTerm('')}>
+              Continue Shopping
+            </SecondaryButton>
+          </QuickActions>
+        </SelectedMaterialsSection>
+      )}
 
       <SearchSection>
         <SearchBar>
@@ -349,40 +497,25 @@ const Materials: React.FC = () => {
 
       <MaterialsGrid>
         {filteredMaterials.map((material, index) => (
-          <MaterialCard
+          <MaterialPreview
             key={material.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            whileHover={{ scale: 1.02 }}
-          >
-            <MaterialImage>
-              {material.image}
-            </MaterialImage>
-            <MaterialInfo>
-              <MaterialName>{material.name}</MaterialName>
-              <MaterialDescription>{material.description}</MaterialDescription>
-              <MaterialMeta>
-                <Price>
-                  <DollarSign size={16} />
-                  {material.price}/sq ft
-                </Price>
-                <Rating>
-                  <Star size={16} fill="currentColor" />
-                  {material.rating}
-                </Rating>
-              </MaterialMeta>
-              <MaterialActions>
-                <ActionButton>
-                  <ShoppingCart size={16} />
-                  Add to Cart
-                </ActionButton>
-                <SupplierButton>
-                  <ExternalLink size={16} />
-                </SupplierButton>
-              </MaterialActions>
-            </MaterialInfo>
-          </MaterialCard>
+            material={{
+              _id: material.id.toString(),
+              name: material.name,
+              description: material.description,
+              category: material.category,
+              price: material.price,
+              unit: 'sq ft',
+              supplierName: material.supplier,
+              supplierUrl: '#',
+              imageUrl: material.image,
+              rating: material.rating,
+              inStock: true
+            }}
+            onAddToProject={handleAddToProject}
+            showCalculator={true}
+            isSelected={isMaterialSelected(material.id.toString())}
+          />
         ))}
       </MaterialsGrid>
     </MaterialsContainer>

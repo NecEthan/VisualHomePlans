@@ -14,8 +14,15 @@ import {
   Download,
   Settings,
   Layers,
-  MousePointer
+  MousePointer,
+  DollarSign,
+  ShoppingCart,
+  ExternalLink,
+  Calculator,
+  RefreshCw
 } from 'lucide-react'
+import { useMaterialContext } from '../context/MaterialContext'
+import MaterialPreview from '../components/MaterialPreview'
 
 const EditorContainer = styled.div`
   max-width: 1200px;
@@ -218,12 +225,210 @@ const ActionButton = styled.button`
   }
 `
 
+const CostEstimatePanel = styled.div`
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+`
+
+const CostHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`
+
+const CostTitle = styled.h3`
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`
+
+const CostSummary = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+`
+
+const CostRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+`
+
+const CostLabel = styled.span`
+  color: rgba(255, 255, 255, 0.8);
+`
+
+const CostValue = styled.span`
+  color: #00d4ff;
+  font-weight: 600;
+`
+
+const MaterialCostsList = styled.div`
+  margin-bottom: 1rem;
+`
+
+const MaterialCostItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+`
+
+const MaterialCostInfo = styled.div`
+  flex: 1;
+`
+
+const MaterialCostName = styled.div`
+  color: white;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+`
+
+const MaterialCostDetails = styled.div`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+`
+
+const MaterialCostActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`
+
+const SupplierLink = styled.a`
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: #00d4ff;
+  text-decoration: none;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: translateY(-1px);
+  }
+`
+
+const SwapMaterialButton = styled.button`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+`
+
+const RoomDimensionsDisplay = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+`
+
+const DimensionsTitle = styled.h4`
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`
+
+const DimensionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+`
+
+const DimensionItem = styled.div`
+  text-align: center;
+`
+
+const DimensionValue = styled.div`
+  color: #00d4ff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+`
+
+const DimensionLabel = styled.div`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+`
+
 const Editor: React.FC = () => {
   const [activeTool, setActiveTool] = useState('select')
   const [zoomLevel, setZoomLevel] = useState(100)
   const [isDayMode, setIsDayMode] = useState(true)
   const [selectedMaterial, setSelectedMaterial] = useState('')
   const [selectedColor, setSelectedColor] = useState('#ffffff')
+  const [costEstimate, setCostEstimate] = useState({
+    materialCosts: [
+      {
+        materialId: '1',
+        materialName: 'Premium Hardwood Flooring',
+        quantity: 120,
+        unitPrice: 8.50,
+        totalCost: 1020.00,
+        supplierUrl: 'https://example.com/hardwood',
+        supplierName: 'Home Depot'
+      },
+      {
+        materialId: '2',
+        materialName: 'Ceramic Tile Collection',
+        quantity: 80,
+        unitPrice: 4.25,
+        totalCost: 340.00,
+        supplierUrl: 'https://example.com/tile',
+        supplierName: 'Lowe\'s'
+      }
+    ],
+    totalMaterialCost: 1360.00,
+    laborEstimate: 544.00,
+    totalProjectCost: 1904.00
+  })
+  const [roomDimensions, setRoomDimensions] = useState({
+    length: 20,
+    width: 15,
+    height: 10,
+    area: 300
+  })
+  const { state } = useMaterialContext()
 
   const materials = [
     'Wood', 'Tile', 'Paint', 'Brick', 'Stone', 'Metal',
@@ -318,6 +523,75 @@ const Editor: React.FC = () => {
         </CanvasArea>
         
         <ControlsPanel>
+          {/* Cost Estimate Panel */}
+          <CostEstimatePanel>
+            <CostHeader>
+              <CostTitle>
+                <Calculator size={20} />
+                Cost Estimate
+              </CostTitle>
+            </CostHeader>
+
+            <RoomDimensionsDisplay>
+              <DimensionsTitle>
+                <Settings size={16} />
+                Room Dimensions
+              </DimensionsTitle>
+              <DimensionsGrid>
+                <DimensionItem>
+                  <DimensionValue>{roomDimensions.length}ft</DimensionValue>
+                  <DimensionLabel>Length</DimensionLabel>
+                </DimensionItem>
+                <DimensionItem>
+                  <DimensionValue>{roomDimensions.width}ft</DimensionValue>
+                  <DimensionLabel>Width</DimensionLabel>
+                </DimensionItem>
+                <DimensionItem>
+                  <DimensionValue>{roomDimensions.area} sq ft</DimensionValue>
+                  <DimensionLabel>Area</DimensionLabel>
+                </DimensionItem>
+              </DimensionsGrid>
+            </RoomDimensionsDisplay>
+
+            <CostSummary>
+              <CostRow>
+                <CostLabel>Materials</CostLabel>
+                <CostValue>${costEstimate.totalMaterialCost.toFixed(2)}</CostValue>
+              </CostRow>
+              <CostRow>
+                <CostLabel>Labor (40%)</CostLabel>
+                <CostValue>${costEstimate.laborEstimate.toFixed(2)}</CostValue>
+              </CostRow>
+              <CostRow>
+                <CostLabel>Total Project Cost</CostLabel>
+                <CostValue>${costEstimate.totalProjectCost.toFixed(2)}</CostValue>
+              </CostRow>
+            </CostSummary>
+
+            <MaterialCostsList>
+              {costEstimate.materialCosts.map((material) => (
+                <MaterialCostItem key={material.materialId}>
+                  <MaterialCostInfo>
+                    <MaterialCostName>{material.materialName}</MaterialCostName>
+                    <MaterialCostDetails>
+                      {material.quantity} units × ${material.unitPrice.toFixed(2)} = ${material.totalCost.toFixed(2)}
+                    </MaterialCostDetails>
+                  </MaterialCostInfo>
+                  <MaterialCostActions>
+                    <SupplierLink href={material.supplierUrl} target="_blank">
+                      <ExternalLink size={12} />
+                      Buy
+                    </SupplierLink>
+                    <SwapMaterialButton>
+                      <RefreshCw size={12} />
+                      Swap
+                    </SwapMaterialButton>
+                  </MaterialCostActions>
+                </MaterialCostItem>
+              ))}
+            </MaterialCostsList>
+          </CostEstimatePanel>
+
           <ControlSection>
             <SectionTitle>🎨 Materials</SectionTitle>
             <MaterialGrid>
